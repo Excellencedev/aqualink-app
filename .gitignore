@@ -1,5 +1,4 @@
 # Environment variables
-.env*
 !.env.example
 
 # Virtual env
@@ -26,10 +25,10 @@ lerna-debug.log*
 *.launch
 .settings/
 *.sublime-workspace
-.vscode/*
 
 # Firebase emulator
 .runtimeconfig.json
 
 .wrangler
 .yarn
+config.bat
