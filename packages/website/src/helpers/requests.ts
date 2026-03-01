@@ -23,20 +23,15 @@ const getCachedInstance = () => {
   return cachedInstance;
 };
 
-const agent = (contentType?: string) => {
-  const instanceToUse = getCachedInstance();
-  // eslint-disable-next-line fp/no-mutation
-  instanceToUse.defaults.headers['Content-Type'] =
-    contentType || 'application/json';
-
-  return instanceToUse;
-};
+const agent = () => getCachedInstance();
 
 function send<T>(request: Request): Promise<AxiosResponse<T>> {
-  const headers = request.token
-    ? { Authorization: `Bearer ${request.token}` }
-    : {};
-  return agent(request.contentType).request<T>({
+  const headers = {
+    ...(request.token ? { Authorization: `Bearer ${request.token}` } : {}),
+    'Content-Type': request.contentType || 'application/json',
+  };
+
+  return agent().request<T>({
     method: request.method,
     url: request.url,
     headers,

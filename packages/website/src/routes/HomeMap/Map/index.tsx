@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import {
   MapContainer,
   TileLayer,
@@ -189,8 +190,11 @@ function HomepageMap({
 
   // Memoize the layers to prevent unnecessary re-renders
   // Try to read a date from the URL if present, so WMS can use it.
-  const urlSearchParams = new URLSearchParams(window.location.search);
-  const timeParam = urlSearchParams.get('at') || undefined;
+  const location = useLocation();
+  const timeParam = useMemo(() => {
+    const urlSearchParams = new URLSearchParams(location.search);
+    return urlSearchParams.get('at') || undefined;
+  }, [location.search]);
 
   const sofarLayers = useMemo(
     () => <SofarLayers defaultLayerName={defaultLayerName} time={timeParam} />,
