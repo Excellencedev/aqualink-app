@@ -1,6 +1,6 @@
 import { setupCache } from 'axios-cache-interceptor';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { isUndefined, omitBy } from 'lodash';
+import { isUndefined, memoize, omitBy } from 'lodash';
 
 const instance = axios.create({
   baseURL:
@@ -14,14 +14,7 @@ const instance = axios.create({
 
 // Lazy initialization: only setup cache when first accessed (inside a handler)
 // This prevents async I/O operations in global scope
-let cachedInstance: ReturnType<typeof setupCache> | null = null;
-
-const getCachedInstance = () => {
-  if (!cachedInstance) {
-    cachedInstance = setupCache(instance);
-  }
-  return cachedInstance;
-};
+const getCachedInstance = memoize(() => setupCache(instance));
 
 const agent = () => getCachedInstance();
 
