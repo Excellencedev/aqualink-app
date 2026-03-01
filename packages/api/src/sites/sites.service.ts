@@ -230,7 +230,7 @@ export class SitesService {
     }));
   }
 
-  async findOne(id: number): Promise<Site> {
+  async findOne(id: number, at?: string): Promise<Site> {
     const site = await getSite(
       id,
       this.sitesRepository,
@@ -253,9 +253,15 @@ export class SitesService {
 
     const videoStream = await this.checkVideoStream(site);
 
+    const atDate =
+      at && DateTime.fromISO(at).isValid
+        ? DateTime.fromISO(at).toJSDate()
+        : undefined;
+
     const mappedSiteData = await getCollectionData(
       [site],
       this.latestDataRepository,
+      { at: atDate },
     );
 
     const maskedSpotterApiToken = site.spotterApiToken
