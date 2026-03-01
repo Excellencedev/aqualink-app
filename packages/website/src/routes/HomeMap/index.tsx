@@ -3,13 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'store/hooks';
 import { useLocation } from 'react-router-dom';
-import { Grid, Hidden, Box } from '@mui/material';
+import { Grid, Hidden } from '@mui/material';
 import { WithStyles } from '@mui/styles';
 import createStyles from '@mui/styles/createStyles';
 import withStyles from '@mui/styles/withStyles';
 import SwipeableBottomSheet from 'react-swipeable-bottom-sheet';
 import { sitesRequest, sitesListSelector } from 'store/Sites/sitesListSlice';
-import DatePicker from 'common/Datepicker';
 import { siteRequest } from 'store/Sites/selectedSiteSlice';
 import { siteOnMapSelector } from 'store/Homepage/homepageSlice';
 
@@ -68,28 +67,24 @@ function Homepage({ classes }: HomepageProps) {
   const siteOnMap = useSelector(siteOnMapSelector);
   const [showSiteTable, setShowSiteTable] = React.useState(true);
   const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
   const { initialZoom, initialSiteId, initialCenter }: MapQueryParams =
     useQuery();
+  const urlParams: URLSearchParams = new URLSearchParams(useLocation().search);
+  const at = urlParams.get('at') || undefined;
 
   useEffect(() => {
-    dispatch(
-      sitesRequest(
-        selectedDate ? { at: selectedDate.toISOString() } : undefined,
-      ),
-    );
-  }, [dispatch, selectedDate]);
+    dispatch(sitesRequest(at ? { at } : undefined));
+  }, [dispatch, at]);
 
   useEffect(() => {
     if (!siteOnMap && initialSiteId) {
-      dispatch(siteRequest(initialSiteId));
+      dispatch(siteRequest({ id: initialSiteId, at }));
       dispatch(surveysRequest(initialSiteId));
     } else if (siteOnMap) {
-      dispatch(siteRequest(`${siteOnMap.id}`));
+      dispatch(siteRequest({ id: `${siteOnMap.id}`, at }));
       dispatch(surveysRequest(`${siteOnMap.id}`));
     }
-  }, [dispatch, initialSiteId, siteOnMap]);
+  }, [dispatch, initialSiteId, siteOnMap, at]);
 
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
@@ -124,18 +119,6 @@ function Homepage({ classes }: HomepageProps) {
             xs={12}
             md={showSiteTable ? 6 : 12}
           >
-            <Box
-              display="flex"
-              justifyContent="flex-end"
-              p={1}
-              zIndex={1000}
-              position="relative"
-            >
-              <DatePicker
-                value={selectedDate}
-                onChange={(date) => setSelectedDate(date)}
-              />
-            </Box>
             <HomepageMap
               onMapLoad={setMapInstance}
               setShowSiteTable={setShowSiteTable}
