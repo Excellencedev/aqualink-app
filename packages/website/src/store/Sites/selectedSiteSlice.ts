@@ -104,9 +104,8 @@ export const siteRequest = createAsyncThunk<
         at ? { at } : undefined,
       );
       const { data: dailyData } = await siteServices.getSiteDailyData(siteId);
-      const { data: surveyPoints } = await siteServices.getSiteSurveyPoints(
-        siteId,
-      );
+      const { data: surveyPoints } =
+        await siteServices.getSiteSurveyPoints(siteId);
 
       return {
         ...data,
