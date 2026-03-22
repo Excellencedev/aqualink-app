@@ -27,9 +27,9 @@ import {
 import requests from 'helpers/requests';
 import { constructTimeSeriesDataRequestUrl } from 'helpers/siteUtils';
 
-const getSite = (id: string) =>
+const getSite = (id: string, params?: { at?: string }) =>
   requests.send<Site>({
-    url: `sites/${id}`,
+    url: `sites/${id}${requests.generateUrlQueryParams(params || {})}`,
     method: 'GET',
   });
 
@@ -66,12 +66,11 @@ const getSiteSpotterPosition = (id: string) =>
     method: 'GET',
   });
 
-const getSiteTimeSeriesData = (params: TimeSeriesDataRequestParams) => {
-  return requests.send<TimeSeriesDataResponse>({
+const getSiteTimeSeriesData = (params: TimeSeriesDataRequestParams) =>
+  requests.send<TimeSeriesDataResponse>({
     url: constructTimeSeriesDataRequestUrl(params),
     method: 'GET',
   });
-};
 
 const getSiteTimeSeriesDataRange = ({
   siteId,

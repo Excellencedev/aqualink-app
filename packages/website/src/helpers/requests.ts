@@ -1,11 +1,10 @@
 import { setupCache } from 'axios-cache-interceptor';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { isUndefined, omitBy } from 'lodash';
+import { isUndefined, memoize, omitBy } from 'lodash';
 
 const instance = axios.create({
   baseURL:
     process.env.REACT_APP_API_BASE_URL ||
-    // use a default for cloudflare workers as it doesn't have process.env
     'https://production-dot-ocean-systems.uc.r.appspot.com/api',
   headers: {
     Accept: 'application/json, text/html',
@@ -13,21 +12,19 @@ const instance = axios.create({
   },
 });
 
-const cachedInstance = setupCache(instance);
+// Lazy initialization: only setup cache when first accessed (inside a handler)
+// This prevents async I/O operations in global scope
+const getCachedInstance = memoize(() => setupCache(instance));
 
-const agent = (contentType?: string) => {
-  // eslint-disable-next-line fp/no-mutation
-  cachedInstance.defaults.headers['Content-Type'] =
-    contentType || 'application/json';
-
-  return cachedInstance;
-};
+const agent = () => getCachedInstance();
 
 function send<T>(request: Request): Promise<AxiosResponse<T>> {
-  const headers = request.token
-    ? { Authorization: `Bearer ${request.token}` }
-    : {};
-  return agent(request.contentType).request<T>({
+  const headers = {
+    ...(request.token ? { Authorization: `Bearer ${request.token}` } : {}),
+    'Content-Type': request.contentType || 'application/json',
+  };
+
+  return agent().request<T>({
     method: request.method,
     url: request.url,
     headers,
@@ -58,7 +55,9 @@ interface Request {
 }
 
 export default {
-  axiosInstance: cachedInstance,
+  get axiosInstance() {
+    return getCachedInstance();
+  },
   agent,
   send,
   generateUrlQueryParams,
