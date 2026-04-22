@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "rsbuild dev",
-    "build": "rsbuild build",
+    "start": "node init && rsbuild dev",
+    "build": "node init && rsbuild build",
     "test": "vitest --run",
     "test:watch": "vitest",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx ./src --max-warnings 0",
@@ -14,7 +14,7 @@
     "deploy:prod": "dotenv -e .env.prod yarn build && yarn run firebase deploy --only hosting:prod-target",
     "deploy:staging": "dotenv -e .env.staging yarn build && yarn run firebase deploy --only hosting:staging-target",
     "deploy:programize": "dotenv -e .env.programize yarn build && yarn run firebase deploy --only hosting:programize-target",
-    "start:worker": "rsbuild build && wrangler dev",
+    "start:worker": "node init && rsbuild build && wrangler dev",
     "deploy:worker": "rsbuild build && wrangler deploy",
     "audit": "yarn --cwd ../.. run audit"
   },
